@@ -8,7 +8,7 @@ from sshtunnel import SSHTunnelForwarder
 ################## DF 1: Beneficiários do Programa Bolsa Família por faixa de renda (PR) ##################
 df_bf_renda = pd.read_csv('/home/julia/BD2/Datasets/beneficiarios_bs_por_renda_pr.csv', sep=',', encoding='utf-8')
 
-df_bf_renda = df_bf_renda.rename(columns={'Referencia':'Data', 'Quantidade de pessoas em famílias beneficiárias do Programa Bolsa Família em situação de pobreza, segundo a faixa do Programa*':'Familias Beneficiarias BS em pobreza',
+df_bf_renda = df_bf_renda.rename(columns={'Referência':'Data', 'Quantidade de pessoas em famílias beneficiárias do Programa Bolsa Família em situação de pobreza, segundo a faixa do Programa*':'Familias Beneficiarias BS em pobreza',
 'Quantidade de pessoas em famílias de baixa renda** beneficiárias do Programa Bolsa Família':'Familias Beneficiarias BS de baixa renda', 
 'Quantidade de pessoas em famílias com renda per capita mensal acima de meio salário-mínimo*** beneficiárias do Programa Bolsa Família':'Familias Beneficiarias BS renda per capita maior meio salario minimo'})
 
@@ -57,9 +57,24 @@ df_bf_faixa_etaria_masculino = df_bf_faixa_etaria_masculino.rename(columns={'Ref
 })
 
 
-################## DF 4:  ##################
+################## DF 4: Beneficiários do Programa Bolsa Família por tipo de benefício (PR) ##################
 
-df_bf_qntde_beneficios_por_tipo = pd.read_csv('/home/julia/BD2/Datasets/Tabela_PBFBeneficio_Tipo_2015a2026.csv', sep=',', encoding='utf-8')
+df_bf_qntde_beneficios_por_tipo = pd.read_csv('/home/julia/BD2/Datasets/Tabela_PBF_BeneficiosPorTipo_2023a2026.csv', sep=',', encoding='utf-8')
+df_bf_qntde_beneficios_por_tipo = df_bf_qntde_beneficios_por_tipo.rename(columns={'Referência':'Data',})
+
+
+
+
+################# CONCATENANDO OS DADOS: #################
+
+#full outer join de todas as tabelas usando as DATAS:
+df_merged = pd.merge(df_bf_renda, df_bf_faixa_etaria_feminino, on='Data', how='outer')
+df_merged = pd.merge(df_merged, df_bf_faixa_etaria_masculino, on='Data', how='outer')
+df_merged = pd.merge(df_merged, df_bf_qntde_beneficios_por_tipo, on='Data', how='outer')
+
+df_merged.to_csv('/home/julia/BD2/Datasets/df_merged.csv', index=False, encoding='utf-8')
+
+
 
 
 # ------------------------------------ Conexão ao BD: ------------------------------------
@@ -70,7 +85,7 @@ ssh_user = os.getenv('USER_SSH')
 ssh_password = os.getenv('PASSWORD_SSH')
 ssh_key = os.getenv('KEY_SSH')
 db_host = os.getenv('DB_HOST')
-db_port = int(os.getenv('DB_PORT')) # Aqui o .env deve passar o 5433
+db_port = int(os.getenv('DB_PORT'))
 
 if not os.path.exists(ssh_key):
     raise FileNotFoundError(f"Chave SSH não encontrada: {ssh_key}")
@@ -79,7 +94,7 @@ print("Iniciando a criação do túnel...")
 
 # Cria tunel SSH:
 with SSHTunnelForwarder(
-    (ssh_host, 22), # 🔴 CORREÇÃO 1: Porta do servidor SSH é 22
+    (ssh_host, 22), 
     ssh_username=ssh_user,
     ssh_pkey=ssh_key,
     ssh_password=ssh_password,
@@ -90,7 +105,6 @@ with SSHTunnelForwarder(
     
     print(f"SSH Tunnel criado na porta local: {tunnel.local_bind_port}")
     
-    # 🔴 CORREÇÃO 2: Tudo do banco de dados DEVE ficar aqui dentro (indentado)
     print("Conectando ao banco de dados...")
     
     # Apenas um exemplo de como a conexão do SQLAlchemy deve ficar:
