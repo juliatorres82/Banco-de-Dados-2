@@ -1,3 +1,4 @@
+import time
 import pandas as pd
 import os
 from dotenv import load_dotenv
@@ -86,6 +87,9 @@ ssh_password = os.getenv('PASSWORD_SSH')
 ssh_key = os.getenv('KEY_SSH')
 db_host = os.getenv('DB_HOST')
 db_port = int(os.getenv('DB_PORT'))
+db_user = os.getenv('DB_USER')
+db_password = os.getenv('DB_PASSWORD')
+db_name = os.getenv('DB_NAME')
 
 if not os.path.exists(ssh_key):
     raise FileNotFoundError(f"Chave SSH não encontrada: {ssh_key}")
@@ -107,8 +111,22 @@ with SSHTunnelForwarder(
     
     print("Conectando ao banco de dados...")
     
-    # Apenas um exemplo de como a conexão do SQLAlchemy deve ficar:
-    # URL do banco deve usar o 127.0.0.1 e a porta gerada dinamicamente pelo túnel
-    # url = f"postgresql://SEU_USER_DB:SUA_SENHA_DB@127.0.0.1:{tunnel.local_bind_port}/SEU_DB"
-    # engine = create_engine(url)
-    # df = pd.read_sql(text("SELECT 1"), engine)
+    string_conexao = f"postgresql://{db_user}:{db_password}@127.0.0.1:{tunnel.local_bind_port}/{db_name}"
+    engine = create_engine(string_conexao)
+
+    # inserindo o novo dataframe (já merged) no banco de dados:
+    df_merged.to_sql('bd2_2556553', engine, if_exists='replace', index=False)
+
+    # visualizando:
+
+    inicio = time.perf_counter()
+
+    query = "SELECT * FROM bd2_2556553"
+    df_ler = pd.read_sql_query(text(query), engine)
+
+    fim = time.perf_counter()
+
+    print(df_ler.head())
+    print(f"tempo de execução da consulta: {fim - inicio:.4f} segundos")
+
+    
