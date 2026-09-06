@@ -1,0 +1,100 @@
+import pandas as pd
+import os
+from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
+from sshtunnel import SSHTunnelForwarder
+
+
+################## DF 1: Beneficiários do Programa Bolsa Família por faixa de renda (PR) ##################
+df_bf_renda = pd.read_csv('/home/julia/BD2/Datasets/beneficiarios_bs_por_renda_pr.csv', sep=',', encoding='utf-8')
+
+df_bf_renda = df_bf_renda.rename(columns={'Referencia':'Data', 'Quantidade de pessoas em famílias beneficiárias do Programa Bolsa Família em situação de pobreza, segundo a faixa do Programa*':'Familias Beneficiarias BS em pobreza',
+'Quantidade de pessoas em famílias de baixa renda** beneficiárias do Programa Bolsa Família':'Familias Beneficiarias BS de baixa renda', 
+'Quantidade de pessoas em famílias com renda per capita mensal acima de meio salário-mínimo*** beneficiárias do Programa Bolsa Família':'Familias Beneficiarias BS renda per capita maior meio salario minimo'})
+
+
+################## DF 2: Beneficiários do Programa Bolsa Família por faixa etária (PR) - Feminino ##################
+
+
+df_bf_faixa_etaria_feminino = pd.read_csv('/home/julia/BD2/Datasets/feminino_benef_bf_faixa_etaria_pr.csv', sep=',', encoding='utf-8')
+
+df_bf_faixa_etaria_feminino = df_bf_faixa_etaria_feminino.rename(columns={'Referência':'Data', 
+                                                                          'Quantidade de pessoas do sexo feminino com idade entre 0 e 3 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único':'Beneficiarias BF feminino 0 a 3 anos',
+                                                                          'Quantidade de pessoas do sexo feminino com idade entre 4 e 6 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único':'Beneficiarias BF feminino 4 a 6 anos',
+                                                                          'Quantidade de pessoas do sexo feminino com idade entre 7 e 15 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único':'Beneficiarias BF feminino 7 a 15 anos',
+                                                                          'Quantidade de pessoas do sexo feminino com idade entre 16 e 17 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF feminino 16 a 17 anos',
+                                                                          'Quantidade de pessoas do sexo feminino com idade entre 18 e 24 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF feminino 18 a 24 anos',
+                                                                          'Quantidade de pessoas do sexo feminino com idade entre 25 e 34 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF feminino 25 a 34 anos',
+                                                                          'Quantidade de pessoas do sexo feminino com idade entre 35 e 39 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF feminino 35 a 39 anos',
+                                                                          'Quantidade de pessoas do sexo feminino com idade entre 40 e 44 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF feminino 40 a 44 anos',
+                                                                          'Quantidade de pessoas do sexo feminino com idade entre 45 e 49 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF feminino 45 a 49 anos',
+                                                                          'Quantidade de pessoas do sexo feminino com idade entre 50 e 54 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF feminino 50 a 54 anos',
+                                                                          'Quantidade de pessoas do sexo feminino com idade entre 55 e 59 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF feminino 55 a 59 anos',
+                                                                          'Quantidade de pessoas do sexo feminino com idade entre 60 e 64 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF feminino 60 a 64 anos',
+                                                                          'Quantidade de pessoas do sexo feminino com idade acima de 64 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF feminino acima de 64 anos'
+})
+
+
+################## DF 3: Beneficiários do Programa Bolsa Família por faixa etária (PR) - Masculino ##################
+
+
+df_bf_faixa_etaria_masculino = pd.read_csv('/home/julia/BD2/Datasets/Tabela_PBFHomem_FaixaEtaria_2015a2026.csv', sep=',', encoding='utf-8')
+
+df_bf_faixa_etaria_masculino = df_bf_faixa_etaria_masculino.rename(columns={'Referência':'Data', 
+                                                                          'Quantidade de pessoas do sexo masculino com idade entre 0 e 3 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único':'Beneficiarias BF masculino 0 a 3 anos',
+                                                                          'Quantidade de pessoas do sexo masculino com idade entre 4 e 6 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único':'Beneficiarias BF masculino 4 a 6 anos',
+                                                                          'Quantidade de pessoas do sexo masculino com idade entre 7 e 15 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único':'Beneficiarias BF masculino 7 a 15 anos',
+                                                                          'Quantidade de pessoas do sexo masculino com idade entre 16 e 17 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF masculino 16 a 17 anos',
+                                                                          'Quantidade de pessoas do sexo masculino com idade entre 18 e 24 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF masculino 18 a 24 anos',
+                                                                          'Quantidade de pessoas do sexo masculino com idade entre 25 e 34 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF masculino 25 a 34 anos',
+                                                                          'Quantidade de pessoas do sexo masculino com idade entre 35 e 39 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF masculino 35 a 39 anos',
+                                                                          'Quantidade de pessoas do sexo masculino com idade entre 40 e 44 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF masculino 40 a 44 anos',
+                                                                          'Quantidade de pessoas do sexo masculino com idade entre 45 e 49 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF masculino 45 a 49 anos',
+                                                                          'Quantidade de pessoas do sexo masculino com idade entre 50 e 54 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF masculino 50 a 54 anos',
+                                                                          'Quantidade de pessoas do sexo masculino com idade entre 55 e 59 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF masculino 55 a 59 anos',
+                                                                          'Quantidade de pessoas do sexo masculino com idade entre 60 e 64 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF masculino 60 a 64 anos',
+                                                                          'Quantidade de pessoas do sexo masculino com idade acima de 64 anos beneficiárias do Programa Bolsa Família inscritas no Cadastro Único': 'Beneficiarias BF masculino acima de 64 anos'
+})
+
+
+################## DF 4:  ##################
+
+df_bf_qntde_beneficios_por_tipo = pd.read_csv('/home/julia/BD2/Datasets/Tabela_PBFBeneficio_Tipo_2015a2026.csv', sep=',', encoding='utf-8')
+
+
+# ------------------------------------ Conexão ao BD: ------------------------------------
+load_dotenv() # carrega as credenciais
+
+ssh_host = os.getenv('HOST_SSH')
+ssh_user = os.getenv('USER_SSH')
+ssh_password = os.getenv('PASSWORD_SSH')
+ssh_key = os.getenv('KEY_SSH')
+db_host = os.getenv('DB_HOST')
+db_port = int(os.getenv('DB_PORT')) # Aqui o .env deve passar o 5433
+
+if not os.path.exists(ssh_key):
+    raise FileNotFoundError(f"Chave SSH não encontrada: {ssh_key}")
+
+print("Iniciando a criação do túnel...")
+
+# Cria tunel SSH:
+with SSHTunnelForwarder(
+    (ssh_host, 22), # 🔴 CORREÇÃO 1: Porta do servidor SSH é 22
+    ssh_username=ssh_user,
+    ssh_pkey=ssh_key,
+    ssh_password=ssh_password,
+    ssh_private_key_password=ssh_password,
+    remote_bind_address=(db_host, db_port),
+    allow_agent=False
+    ) as tunnel:
+    
+    print(f"SSH Tunnel criado na porta local: {tunnel.local_bind_port}")
+    
+    # 🔴 CORREÇÃO 2: Tudo do banco de dados DEVE ficar aqui dentro (indentado)
+    print("Conectando ao banco de dados...")
+    
+    # Apenas um exemplo de como a conexão do SQLAlchemy deve ficar:
+    # URL do banco deve usar o 127.0.0.1 e a porta gerada dinamicamente pelo túnel
+    # url = f"postgresql://SEU_USER_DB:SUA_SENHA_DB@127.0.0.1:{tunnel.local_bind_port}/SEU_DB"
+    # engine = create_engine(url)
+    # df = pd.read_sql(text("SELECT 1"), engine)
