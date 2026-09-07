@@ -1,14 +1,22 @@
+# Documentação: Pipeline de ETL e Inserção no Banco de Dados
 
-# Documentação: 
+## 1. Fonte dos Dados
+**Dados Escolhidos:** Secretaria de Avaliação, Gestão da Informação e Cadastro Único (SAGICAD) - VIS DATA 3. 
+Foram utilizados 6 arquivos `.csv` referentes ao estado do Paraná, combinando recortes temporais distintos para obter a maior faixa histórica possível.
 
-## Dados escolhidos: Cadastro Único
+## 2. Processo de ETL (Extração, Transformação e Carga)
+Todo o tratamento e manipulação dos dados foi construído em Python, utilizando a biblioteca **Pandas**. O processo de limpeza (localizado no módulo `gerador_matches`) seguiu as seguintes etapas:
 
-### Inserção de novos dados sem duplicatas: 
+* **Merge e Identificação:** Os arquivos CSV foram unificados, utilizando as colunas `Data` e `Municipio` como chaves primárias da análise.
+* **Tratamento de Duplicatas:** Durante a união dos arquivos (especificamente com dados de 2023), foram geradas linhas repetidas. Para garantir a integridade do banco, aplicamos a função `.drop_duplicates(subset=['Municipio', 'Data'])`, que identificou e removeu 399 registros duplicados.
+* **Tipagem Inteligente (Int64):** Como o banco de dados exige números inteiros para contagens, convertemos as colunas numéricas para o tipo especial `Int64` do Pandas. Isso evitou que a biblioteca transformasse as colunas em `float` (decimais) e permitiu **preservar os valores nulos (`NaN`)**. A preservação dos nulos é uma regra de negócio importante, pois a ausência do dado significa que o parâmetro não foi mensurado naquele período, o que difere do valor zero.
 
-Fizemos out join de todas as tabelas juntando-as através da DATA. Como as datas no Cadastro Único aparecem no formato mm/yyyy (e não dd/mm/yyyy), as colocamos como tipo TEXT (ou o postgres não aceitaria).
+## 3. Infraestrutura e Conexão (PostgreSQL)
+A inserção no banco de dados PostGIS foi feita de forma automatizada via script (`connection.py`):
 
-Para o tratamento de dados, usamos o pandas: criamos um dataframe com todas as linhas da coluna 'Data' existentes em todas as tables utilizadas e redefinimos esta coluna como unique(retiramos apenas os valores existentes uma única vez, sem duplicatas). POr fim, utilizamos este dataframe gerado para criar o join (merge) de dados entre todas as tabelas escolhidas.
+* **Segurança:** As credenciais de acesso foram isoladas em um arquivo `.env` gerido pela biblioteca `python-dotenv`.
+* **Túnel SSH:** Para contornar as restrições de rede do servidor universitário (C3SL/UFPR), a conexão foi roteada através de um túnel SSH local (porta `5435`), utilizando a chave de segurança `.pem`.
+* **Carga de Dados (Load):** Utilizamos a biblioteca **SQLAlchemy** (`create_engine`) em conjunto com o método `.to_sql()` do Pandas para criar a tabela `bd2_2556553` e inserir as mais de 67 mil tuplas diretamente no banco de dados.
 
-
-### Tempo de execução da query:
-O tempo de execução da consulta foi de 0.0555 segundos.
+## 4. Desempenho
+* **Tempo de Execução da Consulta:** Após a inserção, foi realizado um teste de leitura dos dados no banco. O tempo médio de execução da query de verificação foi de **0.7344 segundos**.
