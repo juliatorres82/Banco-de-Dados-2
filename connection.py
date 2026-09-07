@@ -67,7 +67,7 @@ with SSHTunnelForwarder(
     inicio = time.perf_counter()
     query = "SELECT * FROM bd2_2556553"
     df_publicado = pd.read_sql_query(text(query), engine)
-    print(df_publicado)
+    #print(df_publicado)
     fim = time.perf_counter()
 
     ## verificando a quantidade de linhas NULAS por coluna:
@@ -81,4 +81,5 @@ with SSHTunnelForwarder(
     print("Quantidade de valores nulos por coluna:")
     print(df_nulos)
 
+    print({len(df_publicado)})
     print(f"Tempo de execução da query: {fim - inicio:.2f} segundos")

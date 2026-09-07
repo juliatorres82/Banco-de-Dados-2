@@ -20,3 +20,17 @@ A inserção no banco de dados PostGIS foi feita de forma automatizada via scrip
 
 ## 4. Desempenho
 * **Tempo de Execução da Consulta:** Após a inserção, foi realizado um teste de leitura dos dados no banco. O tempo médio de execução da query de verificação foi de **0.7344 segundos**.
+
+## 5. Sobre os dados:
+* Quanto à padronização:
+
+Todos as colunas do tipo string (como nome do município) aparecem em letra maiúscula e acentuadas. Para que pudéssemos cruzar os dados com outras tabelas (como a de municípios do Paraná, disponibilizada pelo IBGE), apenas tivemos que modificar o nome das cidades que continham "D'OESTE" para "DOESTE". 
+
+Todas as outras colunas possuíam valores numéricos inteiros e valores sem dados disponíveis como nulos.
+
+
+* Todas as tabelas possuem listados TODOS os municípios do Paraná (não há NENHUM município faltante dos 399).
+
+* A quantidade de valores nulos de cada uma das 40 colunas da nossa tabela foi registrada no arquivo "quantidade_nulos_por_coluna.csv".
+
+* O tempo de execução da query "select * from db2_2556553" levou 2.38 segundos.
