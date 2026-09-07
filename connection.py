@@ -64,8 +64,6 @@ df_bf_qntde_beneficios_por_tipo = pd.read_csv('/home/julia/BD2/Datasets/Tabela_P
 df_bf_qntde_beneficios_por_tipo = df_bf_qntde_beneficios_por_tipo.rename(columns={'Referência':'Data',})
 
 
-
-
 ################# CONCATENANDO OS DADOS: #################
 
 #full outer join de todas as tabelas usando as DATAS:
@@ -74,8 +72,6 @@ df_merged = pd.merge(df_merged, df_bf_faixa_etaria_masculino, on='Data', how='ou
 df_merged = pd.merge(df_merged, df_bf_qntde_beneficios_por_tipo, on='Data', how='outer')
 
 df_merged.to_csv('/home/julia/BD2/Datasets/df_merged.csv', index=False, encoding='utf-8')
-
-
 
 
 # ------------------------------------ Conexão ao BD: ------------------------------------
@@ -128,5 +124,3 @@ with SSHTunnelForwarder(
 
     print(df_ler.head())
     print(f"tempo de execução da consulta: {fim - inicio:.4f} segundos")
-
-    
