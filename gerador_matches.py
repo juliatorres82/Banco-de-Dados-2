@@ -93,17 +93,12 @@ def get_matches():
     df_merge_3 = pd.merge(df_merge_2, df_CADUNICO_faixaEtaria, on=['Data', 'Municipio'], how='outer')
     df_final = pd.merge(df_merge_3, df_TrabInfantil, on=['Data', 'Municipio'], how='outer')
     
-    #transformando para inteiro
+    #transformando para int
     coluna_ignorada = ['Data', 'Municipio']
     colunas_para_converter = df_final.columns.difference(coluna_ignorada)
     df_final[colunas_para_converter] = df_final[colunas_para_converter].astype('Int64')
     
     print(f"Total de tuplas no dataset final: {len(df_final)}")
-    
-    duplicados = df_final[df_final.duplicated(subset=['Municipio', 'Data'], keep=False)]
-
-    print(f"Encontradas {len(duplicados)} linhas duplicadas.")
-    print(duplicados)
 
     df_final = df_final.drop_duplicates(subset=['Municipio', 'Data'])
     print(f"Total de tuplas no dataset final após remover duplicatas: {len(df_final)}")
