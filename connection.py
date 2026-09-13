@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sshtunnel import SSHTunnelForwarder
-from gerador_matches import get_matches
+from atividade_4.gerador_matches import get_matches
 
 DIR_PROJETO = Path(__file__).resolve().parent
 
