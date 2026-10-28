@@ -1,0 +1,12 @@
+indicador,valor,como_foi_calculado
+"Internações analisadas (AIHs únicas, 2024–2025)",70747.0,contagem de linhas após as etapas de limpeza
+% internadas fora do município de residência,49.77,média de (id_municipio_paciente != id_municipio_estabelecimento)
+% internadas fora da própria Região de Saúde,15.09,média de (id_regiao_saude do paciente != do hospital)
+% internadas fora do Paraná,0.56,média de (UF do hospital != PR)
+% internadas a mais de 100 km (linha reta),10.62,média de (dist_km > 100)
+"Distância média (km), todas as internações",43.98,média de dist_km; inclui zeros de quem foi internado no próprio município
+"Distância média (km), só quem saiu do município",88.35,média de dist_km onde fora_municipio = True
+"Distância mediana (km), só quem saiu do município",45.04,mediana de dist_km onde fora_municipio = True
+Municípios de residência com internação,399.0,nunique(id_municipio_paciente)
+Municípios com hospital que recebeu criança do PR,287.0,nunique(id_municipio_estabelecimento)
+Municípios do PR com hospital que internou criança,197.0,nunique(id_municipio_estabelecimento) onde UF = PR

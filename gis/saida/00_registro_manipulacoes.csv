@@ -1,0 +1,16 @@
+etapa,descricao,linhas_antes,linhas_depois,removidas
+municipios,Remove municípios sem centroide em ids_municipios.csv,5571.0,5571,0.0
+municipios,Extrai lon/lat do texto WKT da coluna centroide (ponto central do município),5571.0,5571,0.0
+internacoes,"Leitura de SAUDE_FINAL.csv (SIH/SUS, pacientes do PR com até 16 anos)",86688.0,86688,0.0
+internacoes,"Remove id_aih repetido (linhas duplicadas e AIHs de continuação), mantendo o mês mais antigo",86688.0,85421,1267.0
+internacoes,"Mantém apenas os anos [2024, 2025] (únicos com os 12 meses no arquivo)",85421.0,70747,14674.0
+internacoes,Junta (inner join) centroide e região de saúde dos municípios do paciente e do hospital via id_municipio_6 (remove códigos sem correspondência),70747.0,70747,0.0
+internacoes,"Cria dist_km (haversine entre centroides), fora_municipio, fora_regiao_saude, fora_pr e mais_100km. Obs.: quem é internado no próprio município tem dist_km = 0 por construção",70747.0,70747,0.0
+internacoes,"Cria raca_grupo: PPI (preta + parda + indígena), Branca, Amarela, Sem informação",70747.0,70747,0.0
+cadunico,"Leitura de bd2_2556553.csv (CadÚnico/PBF, município × mês)",67431.0,67431,0.0
+cadunico,"Mantém apenas meses de [2024, 2025]",67431.0,9576,57855.0
+cadunico,"Soma faixas etárias (fem + masc) -> bf_pessoas; faixas 0–3, 4–6, 7–15 -> bf_criancas_0_15; pretos + pardos + indígenas -> cad_ppi; todas as categorias de raça -> cad_total_raca",9576.0,9576,0.0
+cadunico,Agrupa por município: média mensal de cada contagem (meses nulos são ignorados na média); conta quantos meses têm dado de trabalho infantil,9576.0,399,9177.0
+cadunico,"Converte nome do município em código IBGE (nome em maiúsculas, D'OESTE -> DOESTE)",399.0,399,0.0
+populacao,"Censo 2022 (SIDRA 9606, raça × idade): pop_total; pop_0_15 = 0–4 + 5–9 + 10–14 + 15 anos; pop_0_16 = pop_0_15 + 16 anos; PPI = preta + parda + indígena, para todas as idades e para 0–16 anos",,399,
+municipal,Agrega internações por município de residência e junta CadÚnico (média 2024–2025) e Censo 2022. Taxa de internação = internações / 2 anos / pop_0_16 × 1000. pct_ppi_internacoes usa como denominador só internações com raça informada,70747.0,399,70348.0

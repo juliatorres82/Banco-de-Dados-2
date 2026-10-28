@@ -1,0 +1,5 @@
+base,pct_ppi,como_foi_calculado
+"Censo 2022, população total",34.55,censo_ppi / pop_total
+"Censo 2022, crianças de 0–16 anos",34.63,censo_ppi_0_16 / pop_0_16
+"CadÚnico, média mensal 2024–2025 (todas as idades)",33.06,"cad_ppi / cad_total (cad_total inclui ""sem informação"")"
+Internações pediátricas SIH 2024–2025,27.12,internações PPI / internações com raça informada

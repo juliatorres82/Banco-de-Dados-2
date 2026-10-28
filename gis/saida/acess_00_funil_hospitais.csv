@@ -1,0 +1,6 @@
+ordem,etapa,n
+1,Registros com nome de hospital,956
+2,Estabelecimentos distintos (id_estab),478
+3,"Excluídos: hospital-dia, estética, odontologia",4
+4,Excluídos: coordenadas fora do Paraná,2
+5,Hospitais válidos,472
